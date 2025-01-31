@@ -21,7 +21,7 @@ import environ
 env=environ.Env()
 environ.Env.read_env()
 B_URL= "https://backend-parking-p4dd.onrender.com/parking/"
-F_URL="http://localhost:5173/"
+F_URL="https://front-parking.vercel.app/"
 S_ID=env('STORE_ID')
 S_PASS=env('STORE_PASS')
 
