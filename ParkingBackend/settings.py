@@ -49,8 +49,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-   "https://backend-parking-p4dd.onrender.com/",
-    "http://127.0.0.1:5173"
+   "https://backend-parking-p4dd.onrender.com/"
 ]
 
 
