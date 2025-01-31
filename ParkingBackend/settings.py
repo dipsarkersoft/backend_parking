@@ -45,11 +45,11 @@ INSTALLED_APPS = [
 
 
 CORS_ALLOWED_ORIGINS = [
-    "https://front-parking.vercel.app/",
+    "https://front-parking.vercel.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-   "https://backend-parking-p4dd.onrender.com/"
+   "https://backend-parking-p4dd.onrender.com"
 ]
 
 
