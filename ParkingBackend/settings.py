@@ -22,10 +22,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
 
-USER_DB = os.getenv("db_password")
-PASSWORD_DB = os.getenv("db_password")
-HOST_DB = os.getenv("db_host")
-DBNAME_DB = os.getenv("db_dbname")
+
 
 
 
@@ -127,11 +124,11 @@ WSGI_APPLICATION = 'ParkingBackend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME':'postgres',
-        'USER':'postgres.avzfntdjdkhzfsvhhbmk' ,
-        'PASSWORD':PASSWORD_DB,
-        'HOST':'aws-0-us-west-1.pooler.supabase.com',
+        'ENGINE':"django.db.backends.postgresql",
+        'NAME':"postgres",
+        'USER':os.getenv("db_user"),
+        'PASSWORD':os.getenv("db_password"),
+        'HOST':"aws-0-us-west-1.pooler.supabase.com",
         'PORT':6543,
         'OPTIONS': {
             'sslmode': 'require'  
