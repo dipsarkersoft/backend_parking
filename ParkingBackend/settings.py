@@ -26,8 +26,6 @@ CORS_ALLOW_HEADERS = [
     'origin',
 ]
 
-# Application definition
-
 INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',

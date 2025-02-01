@@ -44,6 +44,7 @@ class CreateParkings(APIView):
                        
             name = serializer.validated_data['car_name']
             categ = serializer.validated_data['category']
+            slot = serializer.validated_data['slot']
             if categ:              
                     isctg=CategoryModel.objects.get(id=categ.id)
                                       
@@ -52,12 +53,15 @@ class CreateParkings(APIView):
 
                     user=request.user.userprofile,
                     ticket=generate_id(),
+                    slot=slot,
                     car_name=name,
                     category=categ,
                     start_park=now()  
                     )
-                    isctg.available_slots-=1
+                    isctg.available_slots_list[slot] = "Book"
+                    isctg.available_slots -=1 
                     isctg.save()
+                    
                     res = PerkingSerializer(parking)
                     return Response(
                         {
@@ -67,6 +71,7 @@ class CreateParkings(APIView):
                         }
                     )
             return Response(serializer.errors)
+
 
 
 class CheakTotal(APIView):
@@ -141,6 +146,7 @@ class BackCar(APIView):
                isparking.is_complete=True
                isparking.total_price=t_price
                isparking.end_park=now()
+               catewise.available_slots_list[isparking.slot] ="free"
                catewise.save()
                isparking.save()
                return Response({

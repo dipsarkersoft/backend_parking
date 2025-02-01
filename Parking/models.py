@@ -10,6 +10,7 @@ class ParkingModels(models.Model):
     ticket = models.CharField(max_length=20, unique=True)
     start_park = models.DateTimeField(auto_now_add=True)
     end_park = models.DateTimeField(blank=True, null=True)
+    slot=models.IntegerField(blank=True, null=True)
     total_price = models.IntegerField(default=0)
     is_complete=models.BooleanField(default=False)
     
