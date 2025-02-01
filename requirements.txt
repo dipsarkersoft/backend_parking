@@ -25,6 +25,7 @@ PyMsgBox
 pyperclip
 PyRect
 PyScreeze
+python-dotenv
 pytweening
 requests
 setuptools
