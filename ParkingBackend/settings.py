@@ -1,11 +1,15 @@
 
 
 from pathlib import Path
+import psycopg2
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
@@ -16,6 +20,14 @@ SECRET_KEY = 'django-insecure-x_5k-pk3il_x=&3oq&#h@99!n)i!w$1izra=3t-(ifeon4_s)i
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
+
+
+USER_DB = os.getenv("db_password")
+PASSWORD_DB = os.getenv("db_password")
+HOST_DB = os.getenv("db_host")
+DBNAME_DB = os.getenv("db_dbname")
+
+
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -105,10 +117,25 @@ WSGI_APPLICATION = 'ParkingBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME':'postgres',
+        'USER':USER_DB ,
+        'PASSWORD':PASSWORD_DB,
+        'HOST':'aws-0-us-west-1.pooler.supabase.com',
+        'PORT':6543,
+        'OPTIONS': {
+            'sslmode': 'require'  
+        },
     }
 }
 
