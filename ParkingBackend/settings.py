@@ -53,10 +53,12 @@ INSTALLED_APPS = [
 
 CORS_ALLOWED_ORIGINS = [
     "https://front-parking.vercel.app",
+    "http://localhost:5173"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-   "https://backend-parking-p4dd.onrender.com"
+   "https://backend-parking-p4dd.onrender.com",
+   "http://127.0.0.1:8000"
 ]
 
 
@@ -114,27 +116,27 @@ WSGI_APPLICATION = 'ParkingBackend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-
 DATABASES = {
     'default': {
-        'ENGINE':"django.db.backends.postgresql",
-        'NAME':"postgres",
-        'USER':os.getenv("db_user"),
-        'PASSWORD':os.getenv("db_password"),
-        'HOST':"aws-0-us-west-1.pooler.supabase.com",
-        'PORT':6543,
-        'OPTIONS': {
-            'sslmode': 'require'  
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE':"django.db.backends.postgresql",
+#         'NAME':"postgres",
+#         'USER':os.getenv("db_user"),
+#         'PASSWORD':os.getenv("db_password"),
+#         'HOST':"aws-0-us-west-1.pooler.supabase.com",
+#         'PORT':6543,
+#         'OPTIONS': {
+#             'sslmode': 'require'  
+#         },
+#     }
+# }
 
 
 

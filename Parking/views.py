@@ -20,8 +20,12 @@ import environ
 
 env=environ.Env()
 environ.Env.read_env()
-B_URL= "https://backend-parking-p4dd.onrender.com/parking/"
-F_URL="https://front-parking.vercel.app/"
+# B_URL= "https://backend-parking-p4dd.onrender.com/parking/"
+# F_URL="https://front-parking.vercel.app/"
+
+B_URL="http://127.0.0.1:8000/parking/"
+F_URL="http://localhost:5173/"
+
 S_ID=env('STORE_ID')
 S_PASS=env('STORE_PASS')
 
@@ -58,19 +62,19 @@ class CreateParkings(APIView):
                     category=categ,
                     start_park=now()  
                     )
-                    isctg.available_slots_list[slot] = "Book"
-                    isctg.available_slots -=1 
+                    isctg.available_slots_list[str(slot)] = "B"
+                    isctg.available_slots -= 1
                     isctg.save()
                     
                     res = PerkingSerializer(parking)
                     return Response(
-                        {
-                        "message": "Parking created successfully!",
-                        "data": res.data,
-                        'status':201,
-                        }
-                    )
-            return Response(serializer.errors)
+                                {
+                                "message": "Parking created successfully!",
+                                "data": res.data,
+                                'status':201,
+                                }
+                            )
+            return Response(serializer.errors)       
 
 
 
@@ -146,7 +150,7 @@ class BackCar(APIView):
                isparking.is_complete=True
                isparking.total_price=t_price
                isparking.end_park=now()
-               catewise.available_slots_list[isparking.slot] ="free"
+               catewise.available_slots_list[isparking.slot] ="f"
                catewise.save()
                isparking.save()
                return Response({

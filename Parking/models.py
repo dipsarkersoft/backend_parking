@@ -16,3 +16,4 @@ class ParkingModels(models.Model):
     
     def __str__(self):
         return f"Parking {self.user.user.username}"
+
