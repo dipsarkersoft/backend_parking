@@ -14,8 +14,4 @@ urlpatterns = [
     path('payment/',PaymentView.as_view(), name='Payment_view'),
     path('payment/success/<str:trans_id>/', paymentSucess,name='Payment_red'),
     path('payment/failed/', paymentfailed,name='Payment_failed'),
- 
-  
-   
-
 ]

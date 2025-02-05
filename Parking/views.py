@@ -38,20 +38,23 @@ def generate_id():
 
 class CreateParkings(APIView):
     permission_classes=[IsAuthenticated]
-    # serializer_class=PerkingSerializer
-
-    def post(self, request):
-        serializer = PerkingSerializer(data=request.data)        
+    def post(self,request):
+        serializer=PerkingSerializer(data=request.data)
         if serializer.is_valid():
-                       
-            name = serializer.validated_data['car_name']
-            categ = serializer.validated_data['category']
-            slot = serializer.validated_data['slot']
-            if categ:              
-                    isctg=CategoryModel.objects.get(id=categ.id)
+             name = serializer.validated_data['car_name']
+             categ = serializer.validated_data['category']
+             slot = serializer.validated_data['slot']
+             start_date=serializer.validated_data.get('start_park')
+             end_date=serializer.validated_data.get('end_park')
+            #  print(start_date,end_date)
+
+             if categ:
+                isctg=CategoryModel.objects.get(id=categ.id)
+
+             if not start_date or not end_date:
                                       
                              
-                    parking=ParkingModels.objects.create(
+                parking=ParkingModels.objects.create(
 
                     user=request.user.userprofile,
                     ticket=generate_id(),
@@ -60,21 +63,81 @@ class CreateParkings(APIView):
                     category=categ,
                     start_park=now()  
                     )
-                    isctg.available_slots_list[str(slot)] = "B"
-                    isctg.available_slots -= 1
-                    isctg.save()
+                isctg.available_slots_list[str(slot)] = "B"
+                isctg.available_slots -= 1
+                isctg.save()
                     
-                    res = PerkingSerializer(parking)
-                    return Response(
+                res = PerkingSerializer(parking)
+                return Response(
                                 {
-                                "message": "Parking created successfully!",
+                                "message": "Parking created successfully !",
                                 "data": res.data,
                                 'status':201,
                                 }
                             )
-            return Response(serializer.errors)       
+             else:
+                 if start_date < now():
+                     return Response({"error": "Start date must be in the future"})
+
+                 if end_date <= start_date:
+                     return Response({"error": "End date must be after Start date"})
+                
+                 isExist=ParkingModels.objects.filter(
+                  category=categ, slot=slot,
+                  end_park=end_date, 
+                  start_park=start_date   
+                    )
+                 if isExist.exists():
+                     return Response({
+                         "error": "Slot is already booked for the selected dates"})
+                 
+                 
+
+                 start_park=start_date
+                 end_date=end_date
+            
+                 total_time=end_date-start_park
+                
+               
+                 total__hours = total_time.total_seconds() / 3600
+                 
+
+                 priceper_h=isctg.price_p_h
+
+                 if total__hours <=1:
+                    total__hours=1
 
 
+                 total_price=total__hours*priceper_h  
+
+                 parking = ParkingModels.objects.create(
+                        user=request.user.userprofile,
+                        ticket=generate_id(),
+                        slot=slot,
+                        car_name=name,
+                        category=categ,
+                        start_park=start_date,
+                        end_park=end_date,
+                        total_price=total_price
+                        )
+                 isctg.available_slots_list[str(slot)] = "B"
+                 isctg.available_slots -= 1
+                 isctg.save()
+                    
+                 res = PerkingSerializer(parking)
+                 return Response(
+                                {
+                                "message": "Parking created successfully !",
+                                "data": res.data,
+                                'status':201,
+                                }
+                            )
+                 
+                    
+                 
+        return Response(serializer.errors)
+           
+        
 
 class CheakTotal(APIView):
      permission_classes=[IsAuthenticated]

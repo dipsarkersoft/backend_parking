@@ -8,7 +8,7 @@ class ParkingModels(models.Model):
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE )
     category = models.ForeignKey(CategoryModel, on_delete=models.CASCADE)
     ticket = models.CharField(max_length=20, unique=True)
-    start_park = models.DateTimeField(auto_now_add=True)
+    start_park = models.DateTimeField(blank=True, null=True)
     end_park = models.DateTimeField(blank=True, null=True)
     slot=models.IntegerField(blank=True, null=True)
     total_price = models.IntegerField(default=0)
