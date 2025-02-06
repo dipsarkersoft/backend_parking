@@ -1,6 +1,6 @@
 from django.urls import path,include
 from rest_framework.routers import DefaultRouter
-from .views import AllParkings,CreateParkings,CheakTotal,BackCar,PaymentView,paymentSucess,paymentfailed
+from .views import AllParkings,CreateParkings,CheakTotal,BackCar,PaymentView,paymentSucess,paymentfailed,AvailableSlotView
 
 
 router=DefaultRouter()
@@ -8,6 +8,9 @@ urlpatterns = [
   
     path('', include(router.urls)),
     path('all/', AllParkings.as_view(),name='all_parkings'),
+    
+    path('availableSlot/', AvailableSlotView.as_view(),name='availableSlot'),
+
     path('create/', CreateParkings.as_view(),name='create_parkings'),
     path('cheaktotal/<int:id>', CheakTotal.as_view(),name='cheaktotal'),
     path('back/<int:id>', BackCar.as_view(),name='backcar'),

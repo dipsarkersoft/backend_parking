@@ -6,7 +6,7 @@ from .models import ParkingModels
 from profiles.permission import IsOwner
 from django.utils.timezone import now
 from rest_framework.permissions import IsAuthenticated
-from category.models import CategoryModel
+from category.models import CategoryModel,SlotModel
 import uuid
 from sslcommerz_lib import SSLCOMMERZ
 import uuid
@@ -23,6 +23,9 @@ environ.Env.read_env()
 B_URL= "https://backend-parking-p4dd.onrender.com/parking/"
 F_URL="https://front-parking.vercel.app/"
 
+# B_URL= "http://127.0.0.1:8000/parking/"
+# F_URL="http://localhost:5173/"
+
 
 S_ID=env('STORE_ID')
 S_PASS=env('STORE_PASS')
@@ -37,6 +40,7 @@ def generate_id():
 
 
 class CreateParkings(APIView):
+
     permission_classes=[IsAuthenticated]
     def post(self,request):
         serializer=PerkingSerializer(data=request.data)
@@ -44,73 +48,49 @@ class CreateParkings(APIView):
              name = serializer.validated_data['car_name']
              categ = serializer.validated_data['category']
              slot = serializer.validated_data['slot']
-             start_date=serializer.validated_data.get('start_park')
-             end_date=serializer.validated_data.get('end_park')
-            #  print(start_date,end_date)
-
+             start_date=serializer.validated_data['start_park']
+             end_date=serializer.validated_data['end_park']
+            
+             if not start_date or not end_date:
+                 return Response({"error": "Start date And End date must be Needed"})                                                                 
+             if start_date < now():
+                
+                return Response({"error": "Start date must be in the future"})
+             if end_date <= start_date:
+                return Response({"error": "End date must be after Start date"})
+             
              if categ:
                 isctg=CategoryModel.objects.get(id=categ.id)
-
-             if not start_date or not end_date:
-                                      
-                             
-                parking=ParkingModels.objects.create(
-
-                    user=request.user.userprofile,
-                    ticket=generate_id(),
-                    slot=slot,
-                    car_name=name,
-                    category=categ,
-                    start_park=now()  
-                    )
-                isctg.available_slots_list[str(slot)] = "B"
-                isctg.available_slots -= 1
-                isctg.save()
-                    
-                res = PerkingSerializer(parking)
-                return Response(
-                                {
-                                "message": "Parking created successfully !",
-                                "data": res.data,
-                                'status':201,
-                                }
-                            )
-             else:
-                 if start_date < now():
-                     return Response({"error": "Start date must be in the future"})
-
-                 if end_date <= start_date:
-                     return Response({"error": "End date must be after Start date"})
                 
-                 isExist=ParkingModels.objects.filter(
+             isExist=ParkingModels.objects.filter(
                   category=categ, slot=slot,
-                  end_park=end_date, 
-                  start_park=start_date   
+                  start_park__lt=end_date, 
+                  end_park__gt=start_date   
                     )
-                 if isExist.exists():
+             if isExist.exists():
                      return Response({
                          "error": "Slot is already booked for the selected dates"})
                  
                  
 
-                 start_park=start_date
-                 end_date=end_date
+                 
             
-                 total_time=end_date-start_park
+             total_time=end_date-start_date
                 
                
-                 total__hours = total_time.total_seconds() / 3600
+             total__hours = total_time.total_seconds() / 3600
                  
 
-                 priceper_h=isctg.price_p_h
+             priceper_h=isctg.price_p_h
 
-                 if total__hours <=1:
+             if total__hours <=1:
                     total__hours=1
 
 
-                 total_price=total__hours*priceper_h  
+             total_price=total__hours*priceper_h  
 
-                 parking = ParkingModels.objects.create(
+
+             parking = ParkingModels.objects.create(
                         user=request.user.userprofile,
                         ticket=generate_id(),
                         slot=slot,
@@ -120,13 +100,12 @@ class CreateParkings(APIView):
                         end_park=end_date,
                         total_price=total_price
                         )
-                 isctg.available_slots_list[str(slot)] = "B"
-                 isctg.available_slots -= 1
-                 isctg.save()
+                 
+             isctg.available_slots -= 1
+             isctg.save()
                     
-                 res = PerkingSerializer(parking)
-                 return Response(
-                                {
+             res = PerkingSerializer(parking)
+             return Response( {
                                 "message": "Parking created successfully !",
                                 "data": res.data,
                                 'status':201,
@@ -136,8 +115,45 @@ class CreateParkings(APIView):
                     
                  
         return Response(serializer.errors)
-           
-        
+
+
+class AvailableSlotView(APIView):
+
+    # permission_classes=[IsAuthenticated]
+
+    def get(self,request):
+        cat_id =request.query_params.get('category_id')      
+        start_time =request.query_params.get('start_time')      
+        end_time =request.query_params.get('end_time')
+
+        if not cat_id or not start_time or not end_time:
+            return Response(
+                {"error": "Category, start_time, and end_time are required!"}
+                 )
+        ctg = CategoryModel.objects.get(id=cat_id)
+        all_slot=SlotModel.objects.filter(category=ctg)
+        availableSlot=[]
+
+        for slot in all_slot:
+            is_book=ParkingModels.objects.filter(
+                category=ctg,
+                slot=slot,
+                start_park__lt=end_time,
+                end_park__gt=start_time
+            ).exists()
+            if not is_book:
+                availableSlot.append({
+
+                     "id": slot.id, "slot_number": slot.slot_number
+
+                    })
+
+        return Response({
+            "message": "All Free Slots ",
+            "data": availableSlot
+        })        
+
+       
 
 class CheakTotal(APIView):
      permission_classes=[IsAuthenticated]
@@ -150,31 +166,12 @@ class CheakTotal(APIView):
           if isparking:      
                       
                ticket=request.data.get('ticket')
-            #    print(ticket)
-            #    print(isparking.ticket)
-
                if isparking.ticket!=ticket:
                     return Response({
                     'message':"Wrong Ticket Please Cheak"
                                 })
                
-               start_park=isparking.start_park
-               timeNow=now() 
-            
-               total_time=timeNow-start_park
-                
-               
-               total__hours = total_time.total_seconds() / 3600
-               round(total__hours)
-
-               catewise=CategoryModel.objects.get(id=isparking.category.id)
-               priceper_h=catewise.price_p_h
-
-               if total__hours <=1:
-                    total__hours=1
-
-
-               total_price=total__hours*priceper_h
+               total_price=isparking.total_price      
                
                return Response({
                     'total_price':round(total_price),
@@ -188,30 +185,19 @@ class CheakTotal(APIView):
                return Response({
                     'message':"ID Wrong Please Cheak"
                })          
-               
-               
+                             
                 
 class BackCar(APIView):
       permission_classes=[IsAuthenticated]
 
       def put(self,request,id):
-          
-          trans_id=request.data.get('trans_ticket')
-          t_price=request.data.get('total_price')
-          if not trans_id or not t_price:
-            return Response({
-                "message": "transaction ticket and total price are required."
-            })
-          
+                      
           isparking=ParkingModels.objects.get(id=id)
         
           if isparking:
                catewise=CategoryModel.objects.get(id=isparking.category.id)
                catewise.available_slots+=1            
                isparking.is_complete=True
-               isparking.total_price=t_price
-               isparking.end_park=now()
-               catewise.available_slots_list[isparking.slot] ="f"
                catewise.save()
                isparking.save()
                return Response({
@@ -231,9 +217,7 @@ class AllParkings(APIView):
              res= data.filter(user=self.request.user.userprofile)
              serializer=PerkingSerializer(res,many=True)
              for item in serializer.data:
-                item.pop("ticket", None)
-             
-            
+                item.pop("ticket", None)         
          
              return Response(
                 {
