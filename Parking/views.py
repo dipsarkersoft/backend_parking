@@ -14,12 +14,15 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 import os
 import environ
-
+from django.db.models import Sum
 
 
 
 env=environ.Env()
 environ.Env.read_env()
+
+
+
 B_URL= "https://backend-parking-p4dd.onrender.com/parking/"
 F_URL="https://front-parking.vercel.app/"
 
@@ -51,6 +54,8 @@ class CreateParkings(APIView):
              start_date=serializer.validated_data['start_park']
              end_date=serializer.validated_data['end_park']
             
+                
+            
              if not start_date or not end_date:
                  return Response({"error": "Start date And End date must be Needed"})                                                                 
              if start_date < now():
@@ -61,56 +66,57 @@ class CreateParkings(APIView):
              
              if categ:
                 isctg=CategoryModel.objects.get(id=categ.id)
-                
-             isExist=ParkingModels.objects.filter(
-                  category=categ, slot=slot,
-                  start_park__lt=end_date, 
-                  end_park__gt=start_date   
-                    )
-             if isExist.exists():
-                     return Response({
-                         "error": "Slot is already booked for the selected dates"})
-                 
-                 
-
-                 
-            
-             total_time=end_date-start_date
-                
                
-             total__hours = total_time.total_seconds() / 3600
-                 
-
-             priceper_h=isctg.price_p_h
-
-             if total__hours <=1:
-                    total__hours=1
-
-
-             total_price=total__hours*priceper_h  
-
-
-             parking = ParkingModels.objects.create(
-                        user=request.user.userprofile,
-                        ticket=generate_id(),
-                        slot=slot,
-                        car_name=name,
-                        category=categ,
-                        start_park=start_date,
-                        end_park=end_date,
-                        total_price=total_price
+                
+                isExist=ParkingModels.objects.filter(
+                    category=categ, slot=slot,
+                    start_park__lt=end_date, 
+                    end_park__gt=start_date   
                         )
-                 
-             isctg.available_slots -= 1
-             isctg.save()
+                if isExist.exists():
+                        return Response({
+                            "error": "Slot is already booked for the selected dates"})
                     
-             res = PerkingSerializer(parking)
-             return Response( {
-                                "message": "Parking created successfully !",
-                                "data": res.data,
-                                'status':201,
-                                }
+                    
+
+                    
+                
+                total_time=end_date-start_date
+                    
+                
+                total__hours = total_time.total_seconds() / 3600
+                    
+
+                priceper_h=isctg.price_p_h
+
+                if total__hours <=1:
+                        total__hours=1
+
+
+                total_price=total__hours*priceper_h  
+
+
+                parking = ParkingModels.objects.create(
+                            user=request.user.userprofile,
+                            ticket=generate_id(),
+                            slot=slot,
+                            car_name=name,
+                            category=categ,
+                            start_park=start_date,
+                            end_park=end_date,
+                            total_price=total_price
                             )
+                    
+                isctg.available_slots -= 1
+                isctg.save()
+                
+                res = PerkingSerializer(parking)
+                return Response( {
+                                    "message": "Parking created successfully !",
+                                    "data": res.data,
+                                    'status':201,
+                                    }
+                                )
                  
                     
                  
@@ -169,6 +175,7 @@ class CheakTotal(APIView):
                if isparking.ticket!=ticket:
                     return Response({
                     'message':"Wrong Ticket Please Cheak"
+                    
                                 })
                
                total_price=isparking.total_price      
@@ -284,9 +291,6 @@ class PaymentView(APIView):
 
 
 
-
-
-
 @csrf_exempt
 async def paymentSucess(request, trans_id: str):
     return redirect(f'{F_URL}payment/sucess/{trans_id}')
@@ -295,12 +299,7 @@ async def paymentSucess(request, trans_id: str):
 
 @csrf_exempt
 async def paymentfailed(request):
-    return redirect(f'{F_URL}payment/failed')
-    
-
-
-          
-            
+    return redirect(f'{F_URL}payment/failed')      
      
 
    

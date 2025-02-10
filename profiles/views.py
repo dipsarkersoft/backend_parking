@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate,login,logout
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile
+from django.contrib.auth.models import User
 # Create your views here.
 
 class UserRegisterView(APIView):
@@ -100,3 +101,45 @@ class LogoutView(APIView):
         request.user.auth_token.delete()
         logout(request)
         return redirect('login')
+    
+
+class UserUpdateView(APIView):
+  
+    permission_classes = [IsAuthenticated]
+     
+    
+    def put(self,request):
+        user=request.user
+        qu_user=User.objects.get(id=user.id)
+        
+        email=request.data.get('email',qu_user.email)
+        first_name=request.data.get('first_name',qu_user.first_name)
+        last_name=request.data.get('last_name',qu_user.last_name)
+        mobile_no=request.data.get('mobile_no',qu_user.userprofile.mobile_no)
+       
+        #print(email,address,mobile_no,last_name,first_name)
+
+        
+        user.email=email
+        user.first_name=first_name
+        user.last_name=last_name
+        user.userprofile.mobile_no=mobile_no
+        
+        user.save()
+        user.userprofile.save()
+        
+        return Response({
+            "message": "User updated successfully.",
+            "status":201,
+             'data':{
+                    "id":user.id,
+                   "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "mobile_no": user.userprofile.mobile_no,
+                    "account_type":user.userprofile.account_type,
+
+                    
+             }
+            
+            })
