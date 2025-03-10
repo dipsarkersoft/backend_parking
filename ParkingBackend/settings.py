@@ -124,19 +124,19 @@ DATABASES = {
 }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE':"django.db.backends.postgresql",
-#         'NAME':"postgres",
-#         'USER':os.getenv("db_user"),
-#         'PASSWORD':os.getenv("db_password"),
-#         'HOST':"aws-0-us-west-1.pooler.supabase.com",
-#         'PORT':6543,
-#         'OPTIONS': {
-#             'sslmode': 'require'  
-#         },
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE':"django.db.backends.postgresql",
+        'NAME':"postgres",
+        'USER':os.getenv("DB_USER"),
+        'PASSWORD':os.getenv("DB_PASS"),
+        'HOST':"aws-0-ap-south-1.pooler.supabase.com",
+        'PORT':6543,
+        'OPTIONS': {
+            'sslmode': 'require'  
+        },
+    }
+}
 
 
 
