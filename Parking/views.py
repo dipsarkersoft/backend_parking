@@ -15,7 +15,8 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 import environ
 from django.db.models import Sum
-
+from category.serilizers import CategorySerializer
+from django.db.models import F
 
 
 env=environ.Env()
@@ -23,7 +24,8 @@ environ.Env.read_env()
 
 
 
-B_URL= "https://backend-parking-p4dd.onrender.com/parking/"
+
+B_URL="https://backend-parking-p4dd.onrender.com/parking/"
 F_URL="https://front-parking.vercel.app/"
 
 # B_URL= "http://127.0.0.1:8000/parking/"
@@ -75,15 +77,9 @@ class CreateParkings(APIView):
                         )
                 if isExist.exists():
                         return Response({
-                            "error": "Slot is already booked for the selected dates"})
-                    
-                    
-
-                    
+                            "error": "Slot is already booked for the selected dates"})                                       
                 
-                total_time=end_date-start_date
-                    
-                
+                total_time=end_date-start_date                  
                 total__hours = total_time.total_seconds() / 3600
                     
 
@@ -98,7 +94,7 @@ class CreateParkings(APIView):
 
                 parking = ParkingModels.objects.create(
                             user=request.user.userprofile,
-                            ticket=generate_id(),
+                            ticket=generate_id(),                           
                             slot=slot,
                             car_name=name,
                             category=categ,
@@ -106,10 +102,11 @@ class CreateParkings(APIView):
                             end_park=end_date,
                             total_price=total_price
                             )
-                    
-                isctg.available_slots -= 1
-                isctg.save()
                 
+                
+                isctg.available_slots -= 1               
+                isctg.save()
+
                 res = PerkingSerializer(parking)
                 return Response( {
                                     "message": "Parking created successfully !",
