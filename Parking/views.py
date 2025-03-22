@@ -25,7 +25,8 @@ environ.Env.read_env()
 
 
 
-B_URL="https://backend-parking-p4dd.onrender.com/parking/"
+# B_URL="https://backend-parking-p4dd.onrender.com/parking/"
+B_URL="https://server-smart-parking.vercel.app/"
 F_URL="https://front-parking.vercel.app/"
 
 # B_URL= "http://127.0.0.1:8000/parking/"

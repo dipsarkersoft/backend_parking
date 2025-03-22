@@ -58,6 +58,7 @@ CORS_ALLOWED_ORIGINS = [
 
 CSRF_TRUSTED_ORIGINS = [
    "https://backend-parking-p4dd.onrender.com",
+   "https://server-smart-parking.vercel.app/",
    "http://127.0.0.1:8000"
 ]
 
